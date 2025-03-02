@@ -1,12 +1,12 @@
+from classes.Simulation import Simulation
+from classes.entities.Human import Human
 from classes.infrastructure.Building import Building
-from classes.infrastructure.Floor import Floor
-from classes.infrastructure.Room import Room
+
+building = Building(n_floors=4, n_rooms=4)
+
+for floor in building.floors:
+    print("En el piso: ", floor.getFloorNumber())
+    for room in floor.getRooms():
+        print("Existen las habitaciones: ", room.getRoomNumber())
 
 
-edificio = Building(n_floors=4, n_rooms=4)
-piso = Floor(1, 3)
-
-
-for room in piso.rooms:
-    print("habitación n° ",room.getRoomNumber(), " ocupantes: ", room.getOccupants())
-    print("estado de la habitación: ", room.sensor)

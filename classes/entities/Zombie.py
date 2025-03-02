@@ -1,13 +1,15 @@
+from .Human import Human
 
 
-
-class Zombie(object):
+class Zombie(Human):
     """
     This class define the Zombie entity.
 
     Attributes:
-        hp: int -> Health Points of the Zombie
+        hp(int): Health Points of the Zombie
     """
 
-    def __init__(self, hp:int):
-        self.__hp = hp
+    def __init__(self, hp:int=100, infection:float=100.0):
+        super().__init__(hp, infection)
+
+    

@@ -10,7 +10,7 @@ class Building(object):
         self.__floors = floors
     
     @property
-    def floors(self):
+    def floors(self) -> tuple[Floor]:
         """
         Generate the number of floors indicated by the user in n_floors attribute.
         """
@@ -21,3 +21,6 @@ class Building(object):
             self.__floors = tuple(f_objects)
 
         return self.__floors
+    
+    def __str__(self):
+        return f"Building have {self.__n_floors} floors and {self.__n_rooms * self.__n_floors} rooms."
