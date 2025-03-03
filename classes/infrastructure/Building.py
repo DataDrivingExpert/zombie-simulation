@@ -4,13 +4,13 @@ class Building(object):
     """
     Allows us to simulate buildings in the zombie invasion
     """
-    def __init__(self, n_floors:int, n_rooms:int, floors: tuple[Floor] | None = None):
+    def __init__(self, n_floors:int, n_rooms:int, floors: tuple[Floor,...] | None = None):
         self.__n_floors = n_floors
         self.__n_rooms = n_rooms
         self.__floors = floors
     
     @property
-    def floors(self) -> tuple[Floor]:
+    def floors(self) -> tuple[Floor,...]:
         """
         Generate the number of floors indicated by the user in n_floors attribute.
         """
@@ -21,6 +21,13 @@ class Building(object):
             self.__floors = tuple(f_objects)
 
         return self.__floors
+    
+    def getTotalOfRooms(self):
+        """
+        Returns the total of Rooms in the Building
+        """
+        return self.__n_floors * self.__n_rooms
+    
     
     def __str__(self):
         return f"Building have {self.__n_floors} floors and {self.__n_rooms * self.__n_floors} rooms."

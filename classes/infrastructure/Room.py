@@ -10,6 +10,8 @@ class Room(object):
         self.__occupants = occupants
         self.__sensor = Sensor(f'F{floor}R{room_number}')
 
+        self.__floor = floor
+
     @property
     def sensor(self):
         return self.__sensor.checkActivity(self.getOccupants())
@@ -25,5 +27,8 @@ class Room(object):
         Returns the number of the occupants in the room
         """
         return self.__occupants
+    
+    def __str__(self):
+        return f"Floor {self.__floor} Room {self.__room_number}"
         
     

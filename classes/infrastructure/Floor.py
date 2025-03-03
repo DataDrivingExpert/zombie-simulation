@@ -9,7 +9,7 @@ class Floor(object):
         self.__floor_number = floor_number
         self.__n_rooms = n_rooms
 
-        self.__rooms: tuple[Room] | None = None
+        self.__rooms: tuple[Room,...] | None = None
 
         r_objects: set[Room] = set()
         for i in range(self.__n_rooms):
@@ -30,7 +30,7 @@ class Floor(object):
         """
         return self.__n_rooms
     
-    def getRooms(self) -> tuple[Room]:
+    def getRooms(self) -> tuple[Room,...] | None:
         """
         Returns the Rooms in the Floor.
         """
