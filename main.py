@@ -17,6 +17,7 @@ for key, value in sim.getSummary().items():
     else:
         print(key,": ", value)
 
-npc_location = sim.whereIs(3)
+search = 9
+npc_location = sim.whereIs(search)
 if npc_location != None:
-    print("The NPC ",3, " is at ", str(npc_location.getRoom()))
+    print("The NPC ",search, " is at ", str(npc_location.getRoom()))

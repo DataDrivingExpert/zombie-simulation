@@ -10,13 +10,16 @@ class Floor(object):
         self.__n_rooms = n_rooms
 
         self.__rooms: tuple[Room,...] | None = None
+        self.__generateRooms()
 
-        r_objects: set[Room] = set()
+
+    def __generateRooms(self):
+        r_objects: list[Room] = []
         for i in range(self.__n_rooms):
-            r_objects.add(Room(room_number=i, floor=self.getFloorNumber()))
+            r_objects.append(Room(room_number=i, floor=self.getFloorNumber()))
+        
         self.__rooms = tuple(r_objects)
         pass
-
     
     def getFloorNumber(self) -> int:
         """

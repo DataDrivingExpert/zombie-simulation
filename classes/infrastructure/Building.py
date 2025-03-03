@@ -4,10 +4,10 @@ class Building(object):
     """
     Allows us to simulate buildings in the zombie invasion
     """
-    def __init__(self, n_floors:int, n_rooms:int, floors: tuple[Floor,...] | None = None):
+    def __init__(self, n_floors:int, n_rooms:int):
         self.__n_floors = n_floors
         self.__n_rooms = n_rooms
-        self.__floors = floors
+        self.__floors :tuple[Floor,...] | None = None
     
     @property
     def floors(self) -> tuple[Floor,...]:

@@ -32,8 +32,8 @@ class Simulation(object):
         self.__state :simulationStates = 'created'
         self.__building: Building | None = None
 
-        self.__locations :set[Location] = set()
-        self.__npc :set[NPC] = set()
+        self.__locations :tuple[Location,...] | None = None
+        self.__npc :list[NPC] = []
         self.__map :np.matrix = np.matrix("") # Matriz de adyacencia
 
     # Getters and Setters
@@ -115,14 +115,17 @@ class Simulation(object):
 
             # Identifying Rooms
             roomIndex = 0
+            temp_locations :list[Location] = []
             for floor in self.__building.floors:
                 for room in floor.getRooms():
-                    self.__locations.add(Location(locId=roomIndex, loc=room))
+                    temp_locations.append(Location(locId=roomIndex, loc=room))
                     roomIndex += 1
+            # Assigning Locations
+            self.__locations = tuple(temp_locations)
 
             # Identifying and Placing NPCs
             for index, entity in enumerate(temp):
-                self.__npc.add(NPC(npcId=index, npc=entity)) # Adding a label to NPC
+                self.__npc.append(NPC(npcId=index, npc=entity)) # Adding a label to NPC
                 # Placing NPCs
                 if type(entity) is Human: # Humans spawn in random Rooms of the Building
                     self.__map[index, random.randint(a=0, b=(self.__map.shape[1] - 1))] = 1
@@ -139,9 +142,9 @@ class Simulation(object):
         Returns the Location instance where the NPC at.
         """
         coordinates = self.__map[npcId, : ].getA1()
-        roomIndex = int(np.searchsorted(coordinates, 1))
-        location = (location for location in self.__locations if location.getId() == roomIndex)
-        return location[0]
+        roomIndex = np.nonzero(coordinates)[0]
+        location = [location for location in self.__locations if location.getId() == roomIndex]
+        return location[0] if location != [] else None
 
 
 
