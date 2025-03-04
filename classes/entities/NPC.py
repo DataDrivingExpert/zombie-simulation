@@ -27,3 +27,6 @@ class NPC(object):
         if isinstance(self.__npc, Human):
             del self.__npc
             self.__npc = Zombie()
+
+    def __str__(self):
+        return f"Human (id:{self.__npcID})" if type(self.__npc) == Human else f"Zombie (id:{self.__npcID})"

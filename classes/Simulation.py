@@ -1,11 +1,13 @@
-# Data types
-from dataTypes.common import simulationStates
 # Classes
 from classes.entities.Human import Human
 from classes.entities.Zombie import Zombie
 from classes.entities.NPC import NPC
 from classes.infrastructure.Location import Location
 from classes.infrastructure.Building import Building
+# Data types
+from dataTypes.common import simulationStates, mapOptions
+# Errors
+from exceptions.GetMapOptionError import GetMapOptionError
 # Modules
 import random
 import numpy as np
@@ -13,13 +15,13 @@ import numpy as np
 class Simulation(object):
 
     """
-    This is the orchestator of the Simulation.
+    This is the orchestator of the `Simulation`.
     Attributes:
-        n_floors(int): Number of Floor to include in the building of simulation's
-        n_rooms(int): Number of Room to create in each Floor
-        n_humans(int = 10): Number of NPC of type Human to generate in the Simulation.
-        turn(int=0): The current turn of the Simulation.
-        state(simulationStates='created'): The current state of the Simulation.
+        n_floors(int): Number of `Floor` to include in the building of simulation's
+        n_rooms(int): Number of `Room` to create in each Floor
+        n_humans(int = 10): Number of NPC of type `Human` to generate in the `Simulation`.
+        turn(int=0): The current turn of the `Simulation`.
+        state(simulationStates='created'): The current state of the `Simulation`.
 
     """
 
@@ -28,30 +30,30 @@ class Simulation(object):
         self.__n_rooms = n_rooms
         self.__n_humans = n_humans
 
-        self.__turn :int = 0
+        self.__shift :int = 0
         self.__state :simulationStates = 'created'
         self.__building: Building | None = None
 
         self.__locations :tuple[Location,...] | None = None
         self.__npc :list[NPC] = []
-        self.__map :np.matrix = np.matrix("") # Matriz de adyacencia
+        self.__map :np.matrix = np.matrix("")
 
     # Getters and Setters
-    def getTurn(self) -> int:
+    def getShift(self) -> int:
         """
-        Returns the current turn number of the Simulation.
+        Returns the current shift number of the `Simulation`.
         """
-        return self.__turn
+        return self.__shift
     
     def getState(self) -> simulationStates:
         """
-        Getter for the state of the Simulation.
+        Getter for the state of the `Simulation`.
         """
         return self.__state
 
     def setState(self, newState:simulationStates):
         """
-        Setter for the state of the Simulation.
+        Setter for the state of the `Simulation`.
         """
         self.__state = newState
         pass
@@ -68,28 +70,55 @@ class Simulation(object):
         """
         return len([zombie for zombie in self.__npc if type(zombie.getInstance()) is Zombie])
     
+    def getMap(self, mode:mapOptions) -> np.matrix | list[str]:
+        """
+        Show the Map of Locations in the adjacency matrix.
+        Params:
+            mode(mapOptions): The mode of the function will determine the format of the result.
+
+        Returns:
+            result(np.matrix | list[str]): the result depends on the selected mode.
+        """
+        if mode == "raw":
+            return self.__map
+        elif mode == "beauty":
+            result :list[str] = []
+            for index in range(self.__map.shape[0]):
+                npc = self.__npc[index]
+                roomIndex= int(np.nonzero(self.__map[index,:].getA1())[0])
+                npc_location = self.__locations[roomIndex]
+                result.append(f"{npc} is at {npc_location.getRoom()}")
+            return result
+        else:
+            raise GetMapOptionError(f"Option \"{mode}\" it is not recognized")
         
     # Class Methods
     def getSummary(self) -> dict:
+        """
+        Display a summary with the main information about the `Simulation`.
+        Returns:
+            result(dict): Python's dictionary with the info.
+        """
         return {
             "state": self.getState(),
-            "turn": self.getTurn(),
+            "turn": self.getShift(),
             "scenario": self.__building,
             "survivors": self.getSurvivors(),
             "zombies": self.getZombies(),
-            "map_of_coordinates": self.__map
+            "map_of_coordinates": self.getMap(mode="beauty")
         }
     
     def nextTurn(self):
         """
-        Move forward in the Simulation one Turn.
+        Move forward in the `Simulation` one Turn.
         """
-        self.__turn += 1
+        self.__shift += 1
+        self.__state = 'standby'
         pass
 
     def build_scenario(self):
         """
-        This private procedure generate the scenario of the Simulation.
+        This private procedure generate the scenario of the `Simulation`.
         """
         if self.__building is None:
             # Defining new objects instances
@@ -128,29 +157,54 @@ class Simulation(object):
                 self.__npc.append(NPC(npcId=index, npc=entity)) # Adding a label to NPC
                 # Placing NPCs
                 if type(entity) is Human: # Humans spawn in random Rooms of the Building
-                    self.__map[index, random.randint(a=0, b=(self.__map.shape[1] - 1))] = 1
+                    self.__map[index, random.randint(a=0, b=(self.__building.getTotalOfRooms() - 1))] = 1
                     continue
                 else:
-                    # Zombies only spawn at first Floor and Rooms. Then, they can move on forward.
+                    # Zombies only spawn at first `Floor` and Rooms. Then, they can move on forward.
                     self.__map[index, 0] = 1 
                     continue
 
         pass
 
-    def whereIs(self, npcId:int) -> Location | None:
+    def whereIs(self, npcId:int) -> Location:
         """
-        Returns the Location instance where the NPC at.
+        Find the Location instance where the indicated NPC at.
+        Params:
+            npcId(int): Identification number of the NPC to search.
+        Returns:
+            loc(Location): Location object where NPC at.
         """
+        # Getting the 'npcId' locations row  
         coordinates = self.__map[npcId, : ].getA1()
-        roomIndex = np.nonzero(coordinates)[0]
-        location = [location for location in self.__locations if location.getId() == roomIndex]
-        return location[0] if location != [] else None
+        # Gathering the index where NPC is located.
+        roomIndex = np.flatnonzero(coordinates)
+        assert roomIndex.size == 1, "The NPC can't be at two locations at the same time."
+        # Returning the location where the NPC is at. 
+        return self.__locations[int(roomIndex[0])]
 
+    def whoIs(self, locId:int) -> tuple[NPC,...]:
+        """
+        Show all NPCs at the indicated Location
+        Params:
+            locId(int): Identification number of the Location of interest.
+        Returns:
+            result(tuple[NPC,...]): tuple of NPCs founded at the Location.
+        """
+        # Getting the specific column associated to the Location.
+        roomSelected = self.__map[:,locId].getA1()
+        # Gathering the indexes of NPCs at the Location.
+        npc_ids = np.flatnonzero(roomSelected)
+        # Saving the NPC instances temporally
+        result :list[NPC] = []
+        for _id in np.nditer(npc_ids, op_dtypes=np.dtype('int32')):
+            result.append(self.__npc[_id])
+        # Returning the tuple with the NPCs founded
+        return tuple(result)
 
 
     def start(self):
         """
-        This procedure execute the simulation with the indicated attributes.
+        This procedure execute the `Simulation` with the indicated attributes.
         """
         # If it is the first time that simulation starts, then Scenario will be created.
         self.__build_scenario()
