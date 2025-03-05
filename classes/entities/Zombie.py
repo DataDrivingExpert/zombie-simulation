@@ -12,4 +12,6 @@ class Zombie(Human):
     def __init__(self, hp:int=100, infection:float=100.0):
         super().__init__(hp, infection)
 
-    
+    def attack(self) -> int:
+        DAMAGE = 10
+        return DAMAGE
