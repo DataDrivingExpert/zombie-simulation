@@ -40,9 +40,6 @@ def dashboard(simulation_details:tuple[int,int,int]):
             pass
 
     def handleLocation(choice) -> None:
-        fsum_display.delete("0.0", "end")
-        result = "entities at floor:\n"
-        
         choiceInt = locations_map[choice]
         
         nhumans, nzombies = (0,0)
@@ -55,9 +52,10 @@ def dashboard(simulation_details:tuple[int,int,int]):
                     else:
                         nzombies += 1
                     
-
-        result += f"\tHumans alive: {str(nhumans)}\n\tZombies: {str(nzombies)}\n"
-        fsum_display.insert("0.0", result)
+        humansCard_value.configure(text=str(nhumans))
+        zombiesCard_value.configure(text=str(nzombies))
+        #sensorsCard_value.configure(text=str(somevalue))
+        
         pass
 
 
@@ -137,8 +135,45 @@ def dashboard(simulation_details:tuple[int,int,int]):
     fsum_label.grid(row=1, column=0, padx=(20,0), pady=10, sticky="w")
 
     # fsum TextBox
-    fsum_display = ctk.CTkTextbox(master=leftCol, font=styles.NORMAL_FONT)
-    fsum_display.grid(row=2, column=0, padx=(20,5),pady=(0,10), sticky="ew")
+    # fsum_display = ctk.CTkTextbox(master=leftCol, font=styles.NORMAL_FONT)
+    # fsum_display.grid(row=2, column=0, padx=(20,5),pady=(0,10), sticky="ew")
+
+    #------------------------------------> Three cols CARDS <--------------------------------------
+    threeCols = ctk.CTkFrame(master=leftCol)
+    threeCols.grid(row=2, column=0, sticky="we", padx=(20,5),pady=(0,10))
+    threeCols.grid_columnconfigure((0,1,2), weight=1)
+
+    humansCard = ctk.CTkFrame(master=threeCols)
+    humansCard.grid(row=0, column=0, padx=5, pady=5, sticky="we")
+    humansCard.grid_columnconfigure(0, weight=1)
+
+    humansCard_value = ctk.CTkLabel(master=humansCard, text="0", font=styles.HEADER_FONT)
+    humansCard_value.grid(row=0, column=0, pady=5,sticky="nsew")
+
+    humansCard_title = ctk.CTkLabel(master=humansCard, text="Humans", font=styles.NORMAL_FONT)
+    humansCard_title.grid(row=1, column=0, pady=5,sticky="sew")
+
+    zombiesCard = ctk.CTkFrame(master=threeCols)
+    zombiesCard.grid(row=0, column=1, padx=5, pady=5,sticky="we")
+    zombiesCard.grid_columnconfigure(0, weight=1)
+
+    zombiesCard_value = ctk.CTkLabel(master=zombiesCard, text="0", font=styles.HEADER_FONT)
+    zombiesCard_value.grid(row=0, column=0, pady=5,sticky="nsew")
+
+    zombiesCard_title = ctk.CTkLabel(master=zombiesCard, text="Zombies", font=styles.NORMAL_FONT)
+    zombiesCard_title.grid(row=1, column=0, pady=5,sticky="sew")
+
+    sensorsCard = ctk.CTkFrame(master=threeCols)
+    sensorsCard.grid(row=0, column=2, padx=5, pady=5,sticky="we")
+    sensorsCard.grid_columnconfigure(0, weight=1)
+
+    sensorsCard_value = ctk.CTkLabel(master=sensorsCard, text="0", font=styles.HEADER_FONT)
+    sensorsCard_value.grid(row=0, column=0, pady=5,sticky="nsew")
+
+    sensorsCard_title = ctk.CTkLabel(master=sensorsCard, text="sensors in alert", font=styles.NORMAL_FONT)
+    sensorsCard_title.grid(row=1, column=0, pady=5,sticky="sew")
+
+    #-------------------------------------------> END <-------------------------------------------
 
     # Simulation activity
 
