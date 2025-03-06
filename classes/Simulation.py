@@ -45,6 +45,8 @@ class Simulation(object):
         self.__npc :list[NPC] = []
         self.__map :np.matrix = np.matrix("")
 
+        self.__log :list[str] = []
+
     # Getters and Setters
     def getShift(self) -> int:
         """
@@ -138,6 +140,7 @@ class Simulation(object):
         """
         self.__shift += 1
         self.__state = 'playing'
+        self.__register(f"Shift {self.getShift()}".center(50, '-'))
         pass
 
     def whereIs(self, npcId:int) -> Location:
@@ -164,22 +167,22 @@ class Simulation(object):
         Returns:
             result(tuple[NPC,...]): tuple of NPCs founded at the Location.
         """
-        print("debug message: locId = ",locId)
+        
         # Getting the specific column associated to the Location.
         roomSelected = self.__map[:,locId].getA1()
-        print("debug message: roomSelected = ",roomSelected)
+        
         # Gathering the indexes of NPCs at the Location.
         npc_ids = np.flatnonzero(roomSelected)
-        print("debug message: npc_ids = ",npc_ids)
+        
         # Saving the NPC instances temporally
         result :list[NPC] = []
         if npc_ids.size != 0:
-            print("El bucle a continuación".center(100, "*"))
+            
             for _id in npc_ids:
-                print("_id = ", _id)
+                
                 npc :NPC = self.__npc[_id]
                 if npc.isAlive():
-                    print("Si, esta vivo")
+                    
                     result.append(self.__npc[_id])
             # Returning the tuple with the NPCs founded
             return tuple(result)
@@ -191,8 +194,9 @@ class Simulation(object):
         This private procedure generate the scenario of the `Simulation`.
         """
         if self.__building is None:
+            # Writing the simulation activity
+            self.__register("Building scenario...")
             # Defining new objects instances
-
             # Creating a new Building...
             self.__building = Building(n_floors=self.__n_floors, n_rooms=self.__n_rooms)
             # Saving characters temporally
@@ -201,7 +205,7 @@ class Simulation(object):
             for _ in range(self.__n_humans):
                 temp.append(Human())
             # Creating zombies
-            for _ in range(random.randint(a=2, b=5)):
+            for _ in range(10): #random.randint(a=2, b=5)
                 temp.append(Zombie())
 
             # Creating map of coordinates
@@ -234,10 +238,20 @@ class Simulation(object):
                     self.__map[index, 0] = 1 
                     continue
 
+            self.__register(f"Simulation state: {self.getState()}")
+            self.__register(f"the scenario has been created")
+            self.__register(f"entities created: {self.getSurvivors()} Humans and {self.getZombies()} Zombies")
         pass    
 
+    def get_log(self) -> list[str]:
+        return self.__log
+
     # Class intern methods
-    def __moveNpc(self,npc:NPC):
+    def __register(self, entry:str):
+        self.__log.append(entry)
+
+
+    def __fight(self,npc:NPC):
         """
         Movement logic for the `NPC` within the `Simulation`
         Params:
@@ -265,59 +279,77 @@ class Simulation(object):
                 if type(who.getInstance()) != type(npc.getInstance()) and who.isAlive():
                     # Then, fight!
                     who - npc.attack() # This affects who.__hp directly because __sub__() method
+                    self.__register(f"{npc} has attacked to {who}")
+                    if who.isTurned():
+                        self.__register(f"Human (id:{who.getId()}) has turned into a Zombie!")
                     
                 else:
                     # If they belong to the same Class or it's opponent is dead.
                     # Then, do nothing. 
                     pass
+        else:
+            pass
 
+    def __move_npc(self, npc:NPC):
+        # Security check
+        if not npc.isAlive():
+            raise DeadNPCError("NPC is dead. So, it can't move or fight")
+        # Get the Id of the NPC
+        index = npc.getId()
+        # Gathering the index of the Room where the NPC is located.
+        currentLocation = int(np.flatnonzero(
+            self.__map[index, : ].getA1()
+            )[0])
         # Map limits represent the end of the building.
         map_limit = int(self.__map.shape[1] - 1)
+        limited :int = inRange(max=map_limit, value=currentLocation + 1)
+
+        # Who is at the same Room?
+        whoIs = self.whoIs(locId=currentLocation)
 
         if type(npc.getInstance()) == Human:
-            count_zombies = len([zombie for zombie in whoIs if type(zombie.getInstance()) is Human and zombie.isAlive()])
+            count_zombies = len([zombie for zombie in whoIs if type(zombie.getInstance()) is Zombie and zombie.isAlive()])
             # Humans are smart; if they see two zombies or more, then they run.
             if count_zombies >= 2:
-                print("Human its running")
                 self.__map[index, currentLocation] = 0
-                self.__map[index, inRange(max=map_limit, value=currentLocation + 1)] = 1
+                self.__map[index, limited] = 1
+                self.__register(f"{npc} has moved from {self.__locations[currentLocation]} to {self.__locations[limited]}.")
             else:
                 # Otherwise, they just defend their position.
                 pass
-        elif type(npc.getInstance()) == Zombie:
+        else:
             # Zombie eats brain. Zombie just stop to eat.
             count_humans = len([human for human in whoIs if type(human.getInstance()) is Human and human.isAlive()])
             if count_humans > 0:
-                print("(Zombie) Debug message: count_humans is ", count_humans, " so Zombie stay quiet")
-                pass # Don't move, here is food.
+                pass # Don't move, here is the food.
             else:
                 # Leave the room. Find some brains.
-                print("(Zombie) Debug message: Zombie moves")
                 self.__map[index, currentLocation] = 0
                 self.__map[index, inRange(max=map_limit, value=currentLocation + 1)] = 1
+                self.__register(f"{npc} has moved from {self.__locations[currentLocation]} to {self.__locations[limited]}.")
             pass
 
     def __cleaner(self):
         """
         """
         if (self.getShift() + 1 ) % 2 == 0:
-            print("Cleaner it's working".center(100,"*"))
+            
             # testing
             testing = self.__npc[0]
             test_position = np.flatnonzero(self.__map[testing.getId(), : ].getA1())[0]
             roomIndex = int(test_position)
-            print("testing defined")
+            
 
             # Find the bodies
             dead_npcs = [npc for npc in self.__npc if not npc.isAlive()]
-            print("dead_npcs: ", dead_npcs)
+            
             for body in dead_npcs:
                 # npc index in adjacency matrix
                 index = body.getId()
-                print("index: ",index)
+                
                 # Deleting from the map
                 self.__map = np.delete(self.__map, index, axis=0)
-                print("DEBUGGING MAP", self.__map)
+                
                 # Removing from the NPC List
                 self.__npc.remove(body)
                 # Reindexing NPCs
@@ -345,24 +377,27 @@ class Simulation(object):
         This procedure execute the `Simulation` with the indicated attributes.
         """
         # If it is the first time that simulation starts, then Scenario will be created.
-        self.build_scenario()
+        # self.build_scenario()
 
-        if self.getShift() == 0:
-            self.setState('playing')
+        self.nextShift()
 
-        # while True:
         self.__cleaner()
+        semaphore = True
         while self.getState() == 'playing':
             for npc in self.__npc:
                 try:
-                    self.__moveNpc(npc=npc)
+                    if semaphore:
+                        self.__move_npc(npc=npc)
+                    else:
+                        self.__fight(npc=npc)
                 except DeadNPCError:
-                    print(npc," is dead. So it can't move it.")
+                    self.__register(f"{npc} has died at shift {self.getShift()}")
                     continue
 
-            # self.__display_summary()
+            if not semaphore:
+                self.setState('standby')
 
-            self.setState('standby')
+            semaphore = not semaphore
 
 
     def stop(self):

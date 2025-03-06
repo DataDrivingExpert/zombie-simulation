@@ -8,6 +8,8 @@ class NPC(object):
         self.__npcID = npcId
         self.__npc = npc
 
+        self.__turned = False
+
     def getId(self) -> int:
         """
         Returns the identification number of the NPC.
@@ -19,6 +21,9 @@ class NPC(object):
         Returns the instance of the entity that object belongs.
         """
         return self.__npc
+    
+    def isTurned(self) -> bool:
+        return self.__turned
     
     def attack(self) -> int:
         """
@@ -57,8 +62,8 @@ class NPC(object):
         This procedure transform `Human` to `Zombie`, keeping its `self.__npcId`.
         """
         if type(self.getInstance()) == Human:
-            print("DEBUG MESSAGE: infected has been triggered")
             self.__npc = Zombie()
+            self.__turned = True
         pass
 
     def __str__(self):

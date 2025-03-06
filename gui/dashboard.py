@@ -19,12 +19,32 @@ def dashboard(simulation_details:tuple[int,int,int]):
     def example():
         pass
 
+    def initCommands():
+        handleLocation(location_selector.get())
+        get_simulation_logs()
+
+    def get_simulation_logs():
+        logs :list[str] = _simulation.get_log()
+        logs.reverse()
+        if type(logs) != None and len(logs) != 0:
+            sim_display.configure(state="normal")
+            sim_display.delete("0.0","end")
+            history = ""
+            for line in logs:
+                history += f"{line}\n"
+
+            sim_display.insert("0.0", history)
+            sim_display.configure(state="disabled")
+            pass
+        else:
+            pass
+
     def handleLocation(choice) -> None:
         fsum_display.delete("0.0", "end")
         result = "entities at floor:\n"
-        print("The user choice is: ",choice)
+        
         choiceInt = locations_map[choice]
-        print("The choiceInt value is: ", choiceInt)
+        
         nhumans, nzombies = (0,0)
 
         for loc in _simulation.getLocations():
@@ -44,6 +64,7 @@ def dashboard(simulation_details:tuple[int,int,int]):
     def playSimulation():
         _simulation.start()
         handleLocation(location_selector.get())
+        get_simulation_logs()
 
     # --------------------------------------------------------------------------
 
@@ -54,7 +75,7 @@ def dashboard(simulation_details:tuple[int,int,int]):
         n_humans=_humans
     )
     _simulation.build_scenario()
-    time.sleep(0.500)
+    time.sleep(0.700)
     print(_simulation.getMap('raw'))
 
 
@@ -118,8 +139,6 @@ def dashboard(simulation_details:tuple[int,int,int]):
     # fsum TextBox
     fsum_display = ctk.CTkTextbox(master=leftCol, font=styles.NORMAL_FONT)
     fsum_display.grid(row=2, column=0, padx=(20,5),pady=(0,10), sticky="ew")
-    # Write down floor details at start
-    handleLocation(location_selector.get())
 
     # Simulation activity
 
@@ -196,6 +215,9 @@ def dashboard(simulation_details:tuple[int,int,int]):
 
     save = ctk.CTkButton(master=controls, text="save", font=styles.NORMAL_FONT,command=example) # Agregar command
     save.grid(row=0, column=3, padx=5, pady=5)
+
+    # ---------------------------------------- > INIT COMMAND CALL <-------------------------------------------
+    initCommands()
 
     root.mainloop()
 
