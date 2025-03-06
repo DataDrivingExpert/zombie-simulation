@@ -22,6 +22,9 @@ class Room(object):
         """
         return self.__room_number
     
+    def getFloorNumber(self):
+        return self.__floor
+    
     def getOccupants(self):
         """
         Returns the number of the occupants in the room

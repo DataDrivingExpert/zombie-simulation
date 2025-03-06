@@ -77,6 +77,12 @@ class Simulation(object):
         """
         return len([zombie for zombie in self.__npc if type(zombie.getInstance()) is Zombie and zombie.isAlive()])
     
+    def getLocations(self, astype:str|Location = Location) -> tuple[Location,...]:
+        if astype == str:
+            return [str(loc) for loc in self.__locations]
+        else:
+            return self.__locations 
+
     def getMap(self, mode:mapOptions) -> np.matrix | list[str]:
         """
         Show the Map of Locations in the adjacency matrix.
@@ -158,19 +164,29 @@ class Simulation(object):
         Returns:
             result(tuple[NPC,...]): tuple of NPCs founded at the Location.
         """
+        print("debug message: locId = ",locId)
         # Getting the specific column associated to the Location.
         roomSelected = self.__map[:,locId].getA1()
+        print("debug message: roomSelected = ",roomSelected)
         # Gathering the indexes of NPCs at the Location.
         npc_ids = np.flatnonzero(roomSelected)
+        print("debug message: npc_ids = ",npc_ids)
         # Saving the NPC instances temporally
         result :list[NPC] = []
-        for _id in np.nditer(npc_ids, op_dtypes=np.dtype('int64')):
-            result.append(self.__npc[_id])
-        # Returning the tuple with the NPCs founded
-        return tuple(result)
-
-    # Class intern methods
-    def __build_scenario(self):
+        if npc_ids.size != 0:
+            print("El bucle a continuación".center(100, "*"))
+            for _id in npc_ids:
+                print("_id = ", _id)
+                npc :NPC = self.__npc[_id]
+                if npc.isAlive():
+                    print("Si, esta vivo")
+                    result.append(self.__npc[_id])
+            # Returning the tuple with the NPCs founded
+            return tuple(result)
+        else:
+            return tuple()
+   
+    def build_scenario(self):
         """
         This private procedure generate the scenario of the `Simulation`.
         """
@@ -220,6 +236,7 @@ class Simulation(object):
 
         pass    
 
+    # Class intern methods
     def __moveNpc(self,npc:NPC):
         """
         Movement logic for the `NPC` within the `Simulation`
@@ -328,29 +345,25 @@ class Simulation(object):
         This procedure execute the `Simulation` with the indicated attributes.
         """
         # If it is the first time that simulation starts, then Scenario will be created.
-        self.__build_scenario()
+        self.build_scenario()
 
         if self.getShift() == 0:
             self.setState('playing')
 
-        while True:
-            self.__cleaner()
-            while self.getState() == 'playing':
-                for npc in self.__npc:
-                    try:
-                        self.__moveNpc(npc=npc)
-                    except DeadNPCError:
-                        print(npc," is dead. So it can't move it.")
-                        continue
+        # while True:
+        self.__cleaner()
+        while self.getState() == 'playing':
+            for npc in self.__npc:
+                try:
+                    self.__moveNpc(npc=npc)
+                except DeadNPCError:
+                    print(npc," is dead. So it can't move it.")
+                    continue
 
-                self.__display_summary()
+            # self.__display_summary()
 
-                self.setState('standby')
+            self.setState('standby')
 
-            input("Presione Enter para continuar...")
-            self.nextShift()
-
-        pass
 
     def stop(self):
         """
