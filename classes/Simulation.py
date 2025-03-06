@@ -46,7 +46,6 @@ class Simulation(object):
         self.__map :np.matrix = np.matrix("")
 
         self.__log :list[str] = []
-        self.__sensors_log :list[str] = []
 
     # Getters and Setters
     def getShift(self) -> int:
@@ -258,10 +257,6 @@ class Simulation(object):
             continue
         return sensors_log
 
-        
-
-        
-
     # Class intern methods
     def __register(self, entry:str):
         self.__log.append(entry)
@@ -392,7 +387,7 @@ class Simulation(object):
         This procedure execute the `Simulation` with the indicated attributes.
         """
         # If it is the first time that simulation starts, then Scenario will be created.
-        # self.build_scenario()
+        self.build_scenario()
 
         self.nextShift()
 
@@ -414,32 +409,25 @@ class Simulation(object):
 
             semaphore = not semaphore
 
-
-    def stop(self):
+    def stop(self) -> None:
         """
         Stop the simulation and end the session.
         """
-        self.setState('stoped')
+        self.setState('stopped')
+        self.__shift = 0
+        self.__building = None
+        self.__locations = None
+        self.__npc = []
+        self.__map = np.matrix("")
+
+        self.__log = []
         pass
 
     def restart(self):
         """
-        Procedure that restart the simulation. Deleting the former instance and creating a new one.
+        Procedure that restart the simulation. Deleting NPCs and Map to create it again.
         """
+        self.stop()
         self.setState('restart')
+        self.start()
         pass
-
-    def pause(self):
-        """
-        This procedure pause the simulation keeping the states of the current scenario.
-        """
-        self.setState('paused')
-        pass
-
-    def resume(self):
-        """
-        Resume the last stopped session.
-        """
-        self.setState('playing')
-        pass
-

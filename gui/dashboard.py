@@ -1,6 +1,6 @@
 # Modules
 import tkinter as tk
-import customtkinter as ctk
+import customtkinter as ctk, sys
 import time
 # Classes
 from classes.Simulation import Simulation
@@ -15,7 +15,7 @@ from gui.globalConfig import styles
 ctk.set_appearance_mode('dark')
 ctk.set_default_color_theme('dark-blue')
 
-def dashboard(simulation_details:tuple[int,int,int]):
+def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,int]):
 
     # ---------------------------> Comands <------------------------------------
     def example():
@@ -73,10 +73,13 @@ def dashboard(simulation_details:tuple[int,int,int]):
         """
         choiceInt = locations_map[choice]
         
-        nhumans, nzombies = (0,0)
+        nhumans, nzombies, nsensors = (0,0,0)
 
         for loc in _simulation.getLocations():
             if loc.getRoom().getFloorNumber() == choiceInt:
+                loc.getRoom().checkRoom(whoIs=_simulation.whoIs(locId=loc.getId()))
+                if loc.getRoom().getSensorState() == 'alert':
+                    nsensors += 1
                 for entity in _simulation.whoIs(locId=loc.getId()):
                     if type(entity.getInstance()) == Human:
                         nhumans += 1
@@ -85,7 +88,7 @@ def dashboard(simulation_details:tuple[int,int,int]):
                     
         humansCard_value.configure(text=str(nhumans))
         zombiesCard_value.configure(text=str(nzombies))
-        #sensorsCard_value.configure(text=str(somevalue))
+        sensorsCard_value.configure(text=str(nsensors))
         
         pass
 
@@ -100,7 +103,6 @@ def dashboard(simulation_details:tuple[int,int,int]):
         scenario_display.insert("0.0", data)
         scenario_display.configure(state="disabled")
 
-
     def playSimulation():
         _simulation.start()
         handleLocation(location_selector.get())
@@ -109,6 +111,13 @@ def dashboard(simulation_details:tuple[int,int,int]):
 
         # Enabling the ping button again
         ping_btn.configure(state="normal")
+
+    def stopSimulation():
+        _simulation.stop()
+        previous.deiconify()
+        root.protocol("WM_DELETE_WINDOW", lambda: sys.exit())
+        root.destroy()
+
 
     # --------------------------------------------------------------------------
 
@@ -293,12 +302,10 @@ def dashboard(simulation_details:tuple[int,int,int]):
     controls.grid_columnconfigure((0,1,2,3), weight=1)
 
 
-        
-
     play = ctk.CTkButton(master=controls, text="next", font=styles.NORMAL_FONT, command=playSimulation) # Agregar command
     play.grid(row=0, column=0, padx=5, pady=5)
 
-    stop = ctk.CTkButton(master=controls, text="stop",  font=styles.NORMAL_FONT, command=example) # Agregar command
+    stop = ctk.CTkButton(master=controls, text="stop",  font=styles.NORMAL_FONT, command=stopSimulation) # Agregar command
     stop.grid(row=0, column=1, padx=5, pady=5)
 
     restart = ctk.CTkButton(master=controls, text="restart", font=styles.NORMAL_FONT,command=example) # Agregar command

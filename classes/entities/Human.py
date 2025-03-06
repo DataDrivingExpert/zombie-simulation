@@ -48,4 +48,4 @@ class Human(object):
         pass
 
     def __del__(self):
-        pass
+        print("DEBUG MESSAGE: instance has been deleted")

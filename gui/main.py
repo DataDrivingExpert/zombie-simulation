@@ -85,7 +85,7 @@ def home():
             humans_value.get()
         ) 
         root.withdraw()
-        dashboard(simulation_details)
+        dashboard(previous=root, simulation_details=simulation_details)
         pass
 
     # Start button
