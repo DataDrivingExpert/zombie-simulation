@@ -19,11 +19,18 @@ def dashboard(simulation_details:tuple[int,int,int]):
     def example():
         pass
 
-    def initCommands():
+    def initCommands() -> None:
+        """
+        This procedure execute the handlers for recover the information at start.
+        """
         handleLocation(location_selector.get())
+        updateScenario()
         get_simulation_logs()
 
-    def get_simulation_logs():
+    def get_simulation_logs() -> None:
+        """
+        This procedure updates the simulation activities in Dashboard
+        """
         logs :list[str] = _simulation.get_log()
         logs.reverse()
         if type(logs) != None and len(logs) != 0:
@@ -40,6 +47,12 @@ def dashboard(simulation_details:tuple[int,int,int]):
             pass
 
     def handleLocation(choice) -> None:
+        """
+        This procedure handles the `command` call function at the `ctk.CtkOptionMenu`
+        for the `Location` selection.
+        Args:
+            choice(str): The choice that user has taken. It's equal to the floor index.
+        """
         choiceInt = locations_map[choice]
         
         nhumans, nzombies = (0,0)
@@ -58,10 +71,22 @@ def dashboard(simulation_details:tuple[int,int,int]):
         
         pass
 
+    def updateScenario() -> None:
+        """
+        This procedure refresh the information about the scenario at the upper right side.
+        """
+        scenario_display.configure(state="normal")
+        scenario_display.delete("0.0", "end")
+        shift, survivors, zombies = _simulation.getShift(), _simulation.getSurvivors(), _simulation.getZombies()
+        data = f"shift:{shift}\nsurvivors:{survivors}\nzombies:{zombies}"
+        scenario_display.insert("0.0", data)
+        scenario_display.configure(state="disabled")
+
 
     def playSimulation():
         _simulation.start()
         handleLocation(location_selector.get())
+        updateScenario()
         get_simulation_logs()
 
     # --------------------------------------------------------------------------
@@ -208,13 +233,8 @@ def dashboard(simulation_details:tuple[int,int,int]):
     scenario_label = ctk.CTkLabel(master=rightCol, text="Scenario", font=styles.NORMAL_FONT)
     scenario_label.grid(row=0, column=0, sticky="nw", padx=5)
 
-    SCENARIO_EXAMPLE = """ turn: 0\n survivors alive: 10\n zombies alive: 5\n """
-
-    scenario_value = tk.StringVar(value=SCENARIO_EXAMPLE)
-
-    scenario_display = ctk.CTkTextbox(master=rightCol, font=styles.NORMAL_FONT)
+    scenario_display = ctk.CTkTextbox(master=rightCol, font=styles.NORMAL_FONT, state="disabled")
     scenario_display.grid(row=1, column=0, sticky="nsew",padx=5)
-    scenario_display.insert("0.0", scenario_value.get())
 
     # Last Sensor triggered
     # ---------------------------> Sensor group <-------------------------------
