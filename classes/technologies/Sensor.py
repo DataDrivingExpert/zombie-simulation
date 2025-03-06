@@ -1,4 +1,5 @@
 from dataTypes.common import sensorStates
+from classes.entities.NPC import NPC
 
 class Sensor(object):
     """
@@ -20,19 +21,27 @@ class Sensor(object):
         """
         return self.__name
 
+    def setState(self, newState:sensorStates) -> None:
+        self.__state = newState
+
     def getState(self) -> sensorStates:
         """
         Returns the current state of the Sensor object.
         """
         return self.__state
 
-    def checkActivity(self, num_occupants:int):
+    def checkActivity(self, occupants:tuple[NPC, ...]):
         """
         Function that updates the state of Sensor instance and returns it.
         """
-        if num_occupants > 0:
-            self.__state = 'alert'
-        else:
-            self.__state = 'normal'
+        for npc in occupants:
+            if npc.getInstance().getInfectionProgress() >= 100.0:
+                self.setState('alert')
+                break
+            else:
+                self.setState('normal')
 
-        return self.__state
+    def __str__(self):
+        return self.__name
+        
+        

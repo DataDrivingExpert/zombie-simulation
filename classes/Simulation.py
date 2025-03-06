@@ -46,6 +46,7 @@ class Simulation(object):
         self.__map :np.matrix = np.matrix("")
 
         self.__log :list[str] = []
+        self.__sensors_log :list[str] = []
 
     # Getters and Setters
     def getShift(self) -> int:
@@ -246,10 +247,24 @@ class Simulation(object):
     def get_log(self) -> list[str]:
         return self.__log
 
+    def get_sensors_info(self) -> list[str]:
+        sensors_log :list[str] = []
+        for loc in self.__locations:
+            i_room = loc.getRoom()
+            i_room.checkRoom(whoIs=self.whoIs(locId=loc.getId()))
+            if i_room.getSensorState() == 'alert':
+                sensors_log.append(i_room.getSensorInstance())
+                pass
+            continue
+        return sensors_log
+
+        
+
+        
+
     # Class intern methods
     def __register(self, entry:str):
         self.__log.append(entry)
-
 
     def __fight(self,npc:NPC):
         """

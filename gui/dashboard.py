@@ -9,6 +9,8 @@ from classes.entities.Human import Human
 # Global config
 from gui.globalConfig import styles
 
+
+
 # Setting global appearance
 ctk.set_appearance_mode('dark')
 ctk.set_default_color_theme('dark-blue')
@@ -26,6 +28,22 @@ def dashboard(simulation_details:tuple[int,int,int]):
         handleLocation(location_selector.get())
         updateScenario()
         get_simulation_logs()
+        pass
+
+    def ping_sensors() -> None:
+        """
+        This procedure let users to ping the sensors once time per shift.
+        """
+        sensor_log_value.configure(state="normal")
+        activity :list[str] = _simulation.get_sensors_info()
+        for act in activity:
+            sensor_log_value.insert("0.0", f"{act} set off!\n")
+        
+        sensor_log_value.configure(state="disabled")
+        ping_btn.configure(state="disabled")
+
+        sensor_display.configure(text=activity[-1])
+
 
     def get_simulation_logs() -> None:
         """
@@ -88,6 +106,9 @@ def dashboard(simulation_details:tuple[int,int,int]):
         handleLocation(location_selector.get())
         updateScenario()
         get_simulation_logs()
+
+        # Enabling the ping button again
+        ping_btn.configure(state="normal")
 
     # --------------------------------------------------------------------------
 
@@ -198,7 +219,7 @@ def dashboard(simulation_details:tuple[int,int,int]):
     sensorsCard_title = ctk.CTkLabel(master=sensorsCard, text="sensors in alert", font=styles.NORMAL_FONT)
     sensorsCard_title.grid(row=1, column=0, pady=5,sticky="sew")
 
-    #-------------------------------------------> END <-------------------------------------------
+    #-------------------------------------------> Three cols  END <-------------------------------------------
 
     # Simulation activity
 
@@ -207,18 +228,33 @@ def dashboard(simulation_details:tuple[int,int,int]):
     simInfo.grid_columnconfigure((0,1), weight=1)
     # simInfo.grid_rowconfigure()
 
-    sim_label = ctk.CTkLabel(master=simInfo, text="Simulation activity", font=styles.NORMAL_FONT)
+    simFrame = ctk.CTkFrame(master=simInfo)
+    simFrame.grid(row=0, column=0, sticky="we", padx=5, pady=5)
+    simFrame.grid_rowconfigure(1,weight=1)
+    simFrame.grid_columnconfigure(0, weight=1)
+
+    sim_label = ctk.CTkLabel(master=simFrame, text="Simulation activity", font=styles.NORMAL_FONT)
     sim_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
-
-    sensor_log_label = ctk.CTkLabel(master=simInfo, text="Sensor logs", font=styles.NORMAL_FONT)
-    sensor_log_label.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-
     # sim TextBox
-    sim_display = ctk.CTkTextbox(master=simInfo, font=styles.NORMAL_FONT)
+    sim_display = ctk.CTkTextbox(master=simFrame, font=styles.NORMAL_FONT)
     sim_display.grid(row=1, column=0, padx=5, pady=5, sticky="we")
 
-    sensor_log = ctk.CTkTextbox(master=simInfo, font=styles.NORMAL_FONT)
-    sensor_log.grid(row=1,column=1, padx=5, pady=5, sticky="we")
+    sensorFrame = ctk.CTkFrame(master=simInfo)
+    sensorFrame.grid(row=0, column=1, sticky="we", padx=5, pady=5)
+    sensorFrame.grid_rowconfigure(1,weight=1)
+    sensorFrame.grid_columnconfigure(0, weight=1)
+
+    # Sensor label
+    sensor_log_label = ctk.CTkLabel(master=sensorFrame, text="Sensor logs", font=styles.NORMAL_FONT)
+    sensor_log_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
+
+    # Here should be the PhotoImage <---------------------------------------
+    ping_btn = ctk.CTkButton(master=sensorFrame, text="ping", width=30, height=30, command=ping_sensors)
+    ping_btn.grid(row=0, column=0, padx=15, pady=5, sticky="e")
+
+    # Sensor values
+    sensor_log_value = ctk.CTkTextbox(master=sensorFrame, font=styles.NORMAL_FONT)
+    sensor_log_value.grid(row=1,column=0, padx=5, pady=5, sticky="we")
 
 
     # ---------------------------> RIGHT COLUMN <----------------------------
