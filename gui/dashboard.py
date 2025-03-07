@@ -92,25 +92,25 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
         
         pass
 
-    def update_scenario() -> None:
+    def update_scenery() -> None:
         """
-        This procedure refresh the information about the scenario at the upper right side.
+        This procedure refresh the information about the scenery at the upper right side.
         """
-        scenario_display.configure(state="normal")
-        scenario_display.delete("0.0", "end")
+        scenery_display.configure(state="normal")
+        scenery_display.delete("0.0", "end")
         shift, survivors, zombies = _simulation.getShift(), _simulation.getSurvivors(), _simulation.getZombies()
         data = f"shift:{shift}\nsurvivors:{survivors}\nzombies:{zombies}"
-        scenario_display.insert("0.0", data)
-        scenario_display.configure(state="disabled")
+        scenery_display.insert("0.0", data)
+        scenery_display.configure(state="disabled")
 
     def refresh_dashboard() -> None:
         """
-        This procedure refresh data about floor summary, scenario and Simulation logs. 
+        This procedure refresh data about floor summary, scenery and Simulation logs. 
         it lets us to display updated info over Dashboard.
         """
         handle_location(location_selector.get()) # Updates the Floor Summary
         get_simulation_logs()   # Updates the Simulation logs
-        update_scenario()   # Updates the scenario details
+        update_scenery()   # Updates the scenery details
         reset_sensors() # Updates the sensor logs and last triggered.
         pass
 
@@ -137,7 +137,7 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
         n_rooms=_rooms,
         n_humans=_humans
     )
-    _simulation.build_scenario()
+    _simulation.build_scenery()
     time.sleep(0.700)
 
     locations_map :dict[str, int]= dict()
@@ -277,12 +277,12 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
     rightCol.grid_rowconfigure(1, weight=1)
     rightCol.grid_rowconfigure(3, weight=2)
 
-    #------------------------> Scenario group <------------------------------
-    scenario_label = ctk.CTkLabel(master=rightCol, text="Scenario", font=styles.NORMAL_FONT)
-    scenario_label.grid(row=0, column=0, sticky="nw", padx=5)
+    #------------------------> scenery group <------------------------------
+    scenery_label = ctk.CTkLabel(master=rightCol, text="scenery", font=styles.NORMAL_FONT)
+    scenery_label.grid(row=0, column=0, sticky="nw", padx=5)
 
-    scenario_display = ctk.CTkTextbox(master=rightCol, font=styles.NORMAL_FONT, state="disabled")
-    scenario_display.grid(row=1, column=0, sticky="nsew",padx=5)
+    scenery_display = ctk.CTkTextbox(master=rightCol, font=styles.NORMAL_FONT, state="disabled")
+    scenery_display.grid(row=1, column=0, sticky="nsew",padx=5)
 
     # Last Sensor triggered
     # ---------------------------> Sensor group <-------------------------------
@@ -324,7 +324,11 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
     refresh_dashboard()
     # ----------------------------------------------------------------------------------------------------------
 
+    def closeAll():
+        root.destroy()
+        previous.destroy()
 
+    root.protocol("WM_DELETE_WINDOW", closeAll)
 
 
 if __name__ == "__main__":

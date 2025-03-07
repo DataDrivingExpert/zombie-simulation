@@ -118,7 +118,7 @@ class Simulation(object):
             return {
                 "state": self.getState(),
                 "turn": self.getShift(),
-                "scenario": self.__building,
+                "scenery": self.__building,
                 "survivors": self.getSurvivors(),
                 "zombies": self.getZombies(),
                 "map_of_coordinates": self.getMap(mode='raw')
@@ -127,7 +127,7 @@ class Simulation(object):
             return {
                 "state": self.getState(),
                 "turn": self.getShift(),
-                "scenario": self.__building,
+                "scenery": self.__building,
                 "survivors": self.getSurvivors(),
                 "zombies": self.getZombies(),
             }
@@ -189,13 +189,13 @@ class Simulation(object):
         else:
             return tuple()
    
-    def build_scenario(self):
+    def build_scenery(self):
         """
-        This private procedure generate the scenario of the `Simulation`.
+        This private procedure generate the scenery of the `Simulation`.
         """
         if self.__building is None:
             # Writing the simulation activity
-            self.__record("Building scenario...")
+            self.__record("Building scenery...")
             # Defining new objects instances
             # Creating a new Building...
             self.__building = Building(n_floors=self.__n_floors, n_rooms=self.__n_rooms)
@@ -240,7 +240,7 @@ class Simulation(object):
 
             self.setState('created')
             self.__record(f"Simulation state: {self.getState()}")
-            self.__record(f"the scenario has been created")
+            self.__record(f"the scenery has been created")
             self.__record(f"entities created: {self.getSurvivors()} Humans and {self.getZombies()} Zombies")
         pass    
 
@@ -387,8 +387,8 @@ class Simulation(object):
         """
         This procedure execute the `Simulation` with the indicated attributes.
         """
-        # If it is the first time that simulation starts, then Scenario will be created.
-        self.build_scenario()
+        # If it is the first time that simulation starts, then scenery will be created.
+        self.build_scenery()
 
         self.nextShift()
 
@@ -431,5 +431,5 @@ class Simulation(object):
         self.stop()
         self.setState('restart')
         self.__record("Simulation has been restarted...")
-        self.build_scenario()
+        self.build_scenery()
         pass
