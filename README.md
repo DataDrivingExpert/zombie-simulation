@@ -45,6 +45,10 @@ A continuación, la pantalla de Dashboard aparecerá con los detalles de la simu
 
 Mediante el `CtkOptionMenu` el usuario puede consultar la información general piso por piso.
 
+> Check Room & Rooms Selector
+
+El usuario puede consultar la situación específica de un piso y una habitación haciendo click sobre `Check Room`.
+
 > ping
 
 Se puede utilizar una sola vez por turno. El usuario puede realizar un ping hacia todos los sensores del edificio. Permitiendo ver los registros de los sensores en `Sensor logs`.
