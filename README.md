@@ -5,9 +5,9 @@ Candidato autor: [Osvaldo Herrera](https://datadrivingexpert.github.io/my-portfo
 
 ### Descripción breve
 
-En esta simulación, los zombies atacan el edificio. Los humanos lo defienden.
-Los zombies se moverán por el edificio hasta encontrar humanos, cuando los encuentren, no seguirán avanzando hasta acabarlos. El movimiento de los zombies siempre es de _traslado_.
-Por otro lado, los humanos juegan a la defensiva. Pelearán y no se moverán a menos que se vean superados en número de 2 a 1.
+En esta simulación, los zombies atacan el edificio. Los humanos lo defienden.  
+Los zombies se moverán por el edificio hasta encontrar humanos, cuando los encuentren, no seguirán avanzando hasta acabarlos. El movimiento de los zombies siempre es de _traslado_.  
+Por otro lado, los humanos juegan a la defensiva. Pelearán y no se moverán a menos que se vean superados en número de 2 a 1.  
 Los zombies siempre aparecerán en el primer piso, primera habitación. Por otro lado, los humanos pueden aparecer en ubicaciones aleatorias del edificio.
 
 ### Instalación
