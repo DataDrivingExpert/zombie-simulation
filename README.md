@@ -1,7 +1,7 @@
 # Simulador de Invasión Zombie (Spanish Version)
 
 Resolución del desafío técnico de **Flair** escrito en `Python`.
-Candidato autor: Osvaldo Herrera.
+Candidato autor: [Osvaldo Herrera](https://datadrivingexpert.github.io/my-portfolio/).
 
 ### Descripción breve
 
