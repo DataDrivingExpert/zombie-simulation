@@ -46,6 +46,3 @@ class Human(object):
     def __sub__(self, value):
         self.__hp -= value
         pass
-
-    def __del__(self):
-        print("DEBUG MESSAGE: instance has been deleted")

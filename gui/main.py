@@ -24,7 +24,7 @@ def home():
     frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
     frame.grid_columnconfigure(0, weight=1)
 
-    title = ctk.CTkLabel(master=frame, text="Zombie invasion simulator", font=("Roboto", 24))
+    title = ctk.CTkLabel(master=frame, text="Zombie invasion simulator", font=styles.HEADER_FONT)
     title.grid(row=0, column=0, pady=15)
 
     # UI for number of Floors selection
@@ -32,7 +32,7 @@ def home():
     nFloors.grid(row=1, column=0, pady=15)
     nFloors.grid_columnconfigure((0,1,2), weight=1)
 
-    floor_label = ctk.CTkLabel(master=nFloors, text="Floors", font=("Roboto", 12))
+    floor_label = ctk.CTkLabel(master=nFloors, text="Floors", font=styles.NORMAL_FONT)
     floor_label.grid(row=0, column=0, padx=10, pady=10)
 
     floors_value = tk.IntVar(value=4)
@@ -49,7 +49,7 @@ def home():
     nRooms.grid(row=2, column=0, pady=15)
     nRooms.grid_columnconfigure((0,1,2), weight=1)
 
-    room_label = ctk.CTkLabel(master=nRooms, text="Rooms", font=("Roboto", 12))
+    room_label = ctk.CTkLabel(master=nRooms, text="Rooms", font=styles.NORMAL_FONT)
     room_label.grid(row=0, column=0, padx=10, pady=10)
 
     rooms_value = tk.IntVar(value=3)
@@ -66,7 +66,7 @@ def home():
     nHumans.grid(row=3, column=0, pady=15)
     nHumans.grid_columnconfigure((0,1,2), weight=1)
 
-    human_label = ctk.CTkLabel(master=nHumans, text="Humans", font=("Roboto", 12))
+    human_label = ctk.CTkLabel(master=nHumans, text="Humans", font=styles.NORMAL_FONT)
     human_label.grid(row=0, column=0, padx=10, pady=10)
 
     humans_value = tk.IntVar(value=10)
@@ -85,7 +85,7 @@ def home():
             humans_value.get()
         ) 
         root.withdraw()
-        dashboard(previous=root, simulation_details=simulation_details)
+        dashboard(previous=root,simulation_details=simulation_details)
         pass
 
     # Start button

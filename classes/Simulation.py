@@ -140,7 +140,7 @@ class Simulation(object):
         """
         self.__shift += 1
         self.__state = 'playing'
-        self.__register(f"Shift {self.getShift()}".center(50, '-'))
+        self.__record(f"Shift {self.getShift()}".center(50, '-'))
         pass
 
     def whereIs(self, npcId:int) -> Location:
@@ -195,7 +195,7 @@ class Simulation(object):
         """
         if self.__building is None:
             # Writing the simulation activity
-            self.__register("Building scenario...")
+            self.__record("Building scenario...")
             # Defining new objects instances
             # Creating a new Building...
             self.__building = Building(n_floors=self.__n_floors, n_rooms=self.__n_rooms)
@@ -238,9 +238,10 @@ class Simulation(object):
                     self.__map[index, 0] = 1 
                     continue
 
-            self.__register(f"Simulation state: {self.getState()}")
-            self.__register(f"the scenario has been created")
-            self.__register(f"entities created: {self.getSurvivors()} Humans and {self.getZombies()} Zombies")
+            self.setState('created')
+            self.__record(f"Simulation state: {self.getState()}")
+            self.__record(f"the scenario has been created")
+            self.__record(f"entities created: {self.getSurvivors()} Humans and {self.getZombies()} Zombies")
         pass    
 
     def get_log(self) -> list[str]:
@@ -258,7 +259,7 @@ class Simulation(object):
         return sensors_log
 
     # Class intern methods
-    def __register(self, entry:str):
+    def __record(self, entry:str):
         self.__log.append(entry)
 
     def __fight(self,npc:NPC):
@@ -289,9 +290,9 @@ class Simulation(object):
                 if type(who.getInstance()) != type(npc.getInstance()) and who.isAlive():
                     # Then, fight!
                     who - npc.attack() # This affects who.__hp directly because __sub__() method
-                    self.__register(f"{npc} has attacked to {who}")
+                    self.__record(f"{npc} has attacked to {who}")
                     if who.isTurned():
-                        self.__register(f"Human (id:{who.getId()}) has turned into a Zombie!")
+                        self.__record(f"Human (id:{who.getId()}) has turned into a Zombie!")
                     
                 else:
                     # If they belong to the same Class or it's opponent is dead.
@@ -323,7 +324,7 @@ class Simulation(object):
             if count_zombies >= 2:
                 self.__map[index, currentLocation] = 0
                 self.__map[index, limited] = 1
-                self.__register(f"{npc} has moved from {self.__locations[currentLocation]} to {self.__locations[limited]}.")
+                self.__record(f"{npc} has moved from {self.__locations[currentLocation]} to {self.__locations[limited]}.")
             else:
                 # Otherwise, they just defend their position.
                 pass
@@ -336,7 +337,7 @@ class Simulation(object):
                 # Leave the room. Find some brains.
                 self.__map[index, currentLocation] = 0
                 self.__map[index, inRange(max=map_limit, value=currentLocation + 1)] = 1
-                self.__register(f"{npc} has moved from {self.__locations[currentLocation]} to {self.__locations[limited]}.")
+                self.__record(f"{npc} has moved from {self.__locations[currentLocation]} to {self.__locations[limited]}.")
             pass
 
     def __cleaner(self):
@@ -375,12 +376,12 @@ class Simulation(object):
             
             pass
 
-    def __display_summary(self):
-        for key, value in self.getSummary(mode='debug').items():
-            if key == "map_of_coordinates":
-                print(key,": \n" ,value)
-            else:
-                print(key,": ", value)
+    # def __display_summary(self):
+    #     for key, value in self.getSummary(mode='debug').items():
+    #         if key == "map_of_coordinates":
+    #             print(key,": \n" ,value)
+    #         else:
+    #             print(key,": ", value)
 
     def start(self):
         """
@@ -401,7 +402,7 @@ class Simulation(object):
                     else:
                         self.__fight(npc=npc)
                 except DeadNPCError:
-                    self.__register(f"{npc} has died at shift {self.getShift()}")
+                    self.__record(f"{npc} has died at shift {self.getShift()}")
                     continue
 
             if not semaphore:
@@ -429,5 +430,6 @@ class Simulation(object):
         """
         self.stop()
         self.setState('restart')
-        self.start()
+        self.__record("Simulation has been restarted...")
+        self.build_scenario()
         pass

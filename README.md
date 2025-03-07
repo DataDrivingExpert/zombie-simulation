@@ -58,10 +58,6 @@ Detiene la simulación y termina la sesión de simulación.
 
 Reinicia la sesión de la simulación, con la misma configuración establecida previamente.
 
-> save
-
-Permite guardar la partida. La cual es cargada automáticamente si se encuentra un registro creado.
-
 ### Arquitectura de la solución
 
 El simulador consta de varias clases que definen la estructura del programa.

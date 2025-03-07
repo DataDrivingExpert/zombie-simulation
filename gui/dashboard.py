@@ -18,20 +18,10 @@ ctk.set_default_color_theme('dark-blue')
 def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,int]):
 
     # ---------------------------> Comands <------------------------------------
-    def example():
-        pass
-
-    def initCommands() -> None:
-        """
-        This procedure execute the handlers for recover the information at start.
-        """
-        handleLocation(location_selector.get())
-        updateScenario()
-        get_simulation_logs()
-        pass
 
     def ping_sensors() -> None:
         """
+        `ping_btn`'s command.
         This procedure let users to ping the sensors once time per shift.
         """
         sensor_log_value.configure(state="normal")
@@ -44,6 +34,16 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
 
         sensor_display.configure(text=activity[-1])
 
+    def reset_sensors() -> None:
+        """
+        """
+        # This is the Sensor logs located at left column.
+        sensor_log_value.configure(state="normal")
+        sensor_log_value.delete("0.0", "end")
+        sensor_log_value.configure(state="disabled")   
+
+        # This is "Last sensor Triggered" at right column.
+        sensor_display.configure(text="No info yet.")
 
     def get_simulation_logs() -> None:
         """
@@ -52,19 +52,19 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
         logs :list[str] = _simulation.get_log()
         logs.reverse()
         if type(logs) != None and len(logs) != 0:
-            sim_display.configure(state="normal")
-            sim_display.delete("0.0","end")
+            sim_value.configure(state="normal")
+            sim_value.delete("0.0","end")
             history = ""
             for line in logs:
                 history += f"{line}\n"
 
-            sim_display.insert("0.0", history)
-            sim_display.configure(state="disabled")
+            sim_value.insert("0.0", history)
+            sim_value.configure(state="disabled")
             pass
         else:
             pass
 
-    def handleLocation(choice) -> None:
+    def handle_location(choice) -> None:
         """
         This procedure handles the `command` call function at the `ctk.CtkOptionMenu`
         for the `Location` selection.
@@ -92,7 +92,7 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
         
         pass
 
-    def updateScenario() -> None:
+    def update_scenario() -> None:
         """
         This procedure refresh the information about the scenario at the upper right side.
         """
@@ -103,22 +103,32 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
         scenario_display.insert("0.0", data)
         scenario_display.configure(state="disabled")
 
-    def playSimulation():
+    def refresh_dashboard() -> None:
+        """
+        This procedure refresh data about floor summary, scenario and Simulation logs. 
+        it lets us to display updated info over Dashboard.
+        """
+        handle_location(location_selector.get()) # Updates the Floor Summary
+        get_simulation_logs()   # Updates the Simulation logs
+        update_scenario()   # Updates the scenario details
+        reset_sensors() # Updates the sensor logs and last triggered.
+        pass
+
+    def play_simulation() -> None:
         _simulation.start()
-        handleLocation(location_selector.get())
-        updateScenario()
-        get_simulation_logs()
+        refresh_dashboard()
 
         # Enabling the ping button again
         ping_btn.configure(state="normal")
 
-    def stopSimulation():
+    def stop_simulation():
         _simulation.stop()
-        previous.deiconify()
-        root.protocol("WM_DELETE_WINDOW", lambda: sys.exit())
         root.destroy()
+        previous.deiconify()
 
-
+    def restart_simulation():
+        _simulation.restart()
+        refresh_dashboard()
     # --------------------------------------------------------------------------
 
     _floors, _rooms, _humans = simulation_details
@@ -129,8 +139,6 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
     )
     _simulation.build_scenario()
     time.sleep(0.700)
-    print(_simulation.getMap('raw'))
-
 
     locations_map :dict[str, int]= dict()
     for floor in range(_floors):
@@ -138,7 +146,7 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
     
     # --------------------------------------------------------------------------
     # root define the base.
-    root = ctk.CTk()
+    root = ctk.CTkToplevel(previous)
     root.title("Simulation/dashboard")
     root.geometry("1080x720+0+0")
     root.grid_columnconfigure(0, weight=1)
@@ -157,7 +165,7 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
     colsLayout.grid(row=1, column=0, sticky="nsew")
     colsLayout.grid_columnconfigure((0), weight=1)
 
-    # -----------------------> LEFT COLUMN <-----------------------------
+    # -----------------------------------------> LEFT COLUMN <-----------------------------------------------
     # Left col in colsLayout
     leftCol = ctk.CTkFrame(master=colsLayout)
     leftCol.grid(row=0, column=0, padx=(5,0),pady=10, sticky="ew")
@@ -179,7 +187,7 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
         font=styles.NORMAL_FONT,
         values=[key for key in locations_map.keys()], 
         variable=location_var,
-        command=handleLocation
+        command=handle_location
         )
     location_selector.grid(row=0,column=1, pady=10,padx=10)
 
@@ -188,10 +196,6 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
     # This is inside leftCol
     fsum_label = ctk.CTkLabel(master=leftCol,text="Floor Summary", font=styles.NORMAL_FONT)
     fsum_label.grid(row=1, column=0, padx=(20,0), pady=10, sticky="w")
-
-    # fsum TextBox
-    # fsum_display = ctk.CTkTextbox(master=leftCol, font=styles.NORMAL_FONT)
-    # fsum_display.grid(row=2, column=0, padx=(20,5),pady=(0,10), sticky="ew")
 
     #------------------------------------> Three cols CARDS <--------------------------------------
     threeCols = ctk.CTkFrame(master=leftCol)
@@ -245,8 +249,8 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
     sim_label = ctk.CTkLabel(master=simFrame, text="Simulation activity", font=styles.NORMAL_FONT)
     sim_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
     # sim TextBox
-    sim_display = ctk.CTkTextbox(master=simFrame, font=styles.NORMAL_FONT)
-    sim_display.grid(row=1, column=0, padx=5, pady=5, sticky="we")
+    sim_value = ctk.CTkTextbox(master=simFrame, font=styles.NORMAL_FONT)
+    sim_value.grid(row=1, column=0, padx=5, pady=5, sticky="we")
 
     sensorFrame = ctk.CTkFrame(master=simInfo)
     sensorFrame.grid(row=0, column=1, sticky="we", padx=5, pady=5)
@@ -257,7 +261,6 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
     sensor_log_label = ctk.CTkLabel(master=sensorFrame, text="Sensor logs", font=styles.NORMAL_FONT)
     sensor_log_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
-    # Here should be the PhotoImage <---------------------------------------
     ping_btn = ctk.CTkButton(master=sensorFrame, text="ping", width=30, height=30, command=ping_sensors)
     ping_btn.grid(row=0, column=0, padx=15, pady=5, sticky="e")
 
@@ -266,7 +269,7 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
     sensor_log_value.grid(row=1,column=0, padx=5, pady=5, sticky="we")
 
 
-    # ---------------------------> RIGHT COLUMN <----------------------------
+    # --------------------------------------------------> RIGHT COLUMN <-------------------------------------------
     # Right column in colsLayout
     rightCol = ctk.CTkFrame(master=colsLayout)
     rightCol.grid(row=0, column=1, padx=(5,10), pady=10, sticky="nsew")
@@ -293,31 +296,33 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
     sensorCard.grid_columnconfigure(0, weight=1)
     sensorCard.grid_rowconfigure(0, weight=1)
 
-    sensor_display = ctk.CTkLabel(master=sensorCard, text="Room 3 at Floor 2", font=("Roboto", 20))
+    sensor_display = ctk.CTkLabel(master=sensorCard, text="No info yet.", font=("Roboto", 20))
     sensor_display.grid(row=0, column=0, sticky="nsew",)
 
-    # ---------------------------> Controls <-----------------------------------
+    # -----------------------------------------> Controls <---------------------------------------------------------
     controls = ctk.CTkFrame(master=frame)
     controls.grid(row=2, column=0, pady=(10, 5), padx=10)
     controls.grid_columnconfigure((0,1,2,3), weight=1)
 
 
-    play = ctk.CTkButton(master=controls, text="next", font=styles.NORMAL_FONT, command=playSimulation) # Agregar command
+    play = ctk.CTkButton(master=controls, text="next", font=styles.NORMAL_FONT, command=play_simulation) # Agregar command
     play.grid(row=0, column=0, padx=5, pady=5)
 
-    stop = ctk.CTkButton(master=controls, text="stop",  font=styles.NORMAL_FONT, command=stopSimulation) # Agregar command
+    stop = ctk.CTkButton(master=controls, text="stop",  font=styles.NORMAL_FONT, command=stop_simulation) # Agregar command
     stop.grid(row=0, column=1, padx=5, pady=5)
 
-    restart = ctk.CTkButton(master=controls, text="restart", font=styles.NORMAL_FONT,command=example) # Agregar command
+    restart = ctk.CTkButton(master=controls, text="restart", font=styles.NORMAL_FONT,command=restart_simulation) # Agregar command
     restart.grid(row=0, column=2, padx=5, pady=5)
 
-    save = ctk.CTkButton(master=controls, text="save", font=styles.NORMAL_FONT,command=example) # Agregar command
-    save.grid(row=0, column=3, padx=5, pady=5)
+    # save = ctk.CTkButton(master=controls, text="save", font=styles.NORMAL_FONT,command=example) # Agregar command
+    # save.grid(row=0, column=3, padx=5, pady=5)
+    #
+    #
+    # -----------------------------------------> Controls END <---------------------------------------------------------
 
     # ---------------------------------------- > INIT COMMAND CALL <-------------------------------------------
-    initCommands()
-
-    root.mainloop()
+    refresh_dashboard()
+    # ----------------------------------------------------------------------------------------------------------
 
 
 
