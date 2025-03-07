@@ -17,7 +17,7 @@ class Building(object):
         if self.__floors is None: # Only execute at start
             f_objects : list[Floor] = []
             for i in range(self.__n_floors):
-                f_objects.append(Floor(i, self.__n_rooms))
+                f_objects.append(Floor(i+1, self.__n_rooms))
             self.__floors = tuple(f_objects)
 
         return self.__floors

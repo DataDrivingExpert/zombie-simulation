@@ -205,7 +205,7 @@ class Simulation(object):
             for _ in range(self.__n_humans):
                 temp.append(Human())
             # Creating zombies
-            for _ in range(10): #random.randint(a=2, b=5)
+            for _ in range(random.randint(a=10, b=15)): #
                 temp.append(Zombie())
 
             # Creating map of coordinates
@@ -319,9 +319,10 @@ class Simulation(object):
         whoIs = self.whoIs(locId=currentLocation)
 
         if type(npc.getInstance()) == Human:
+            count_humans = len([human for human in whoIs if type(human.getInstance()) is Human and human.isAlive()])
             count_zombies = len([zombie for zombie in whoIs if type(zombie.getInstance()) is Zombie and zombie.isAlive()])
-            # Humans are smart; if they see two zombies or more, then they run.
-            if count_zombies >= 2:
+            # Humans are smart.
+            if (count_zombies // count_humans) >= 2:
                 self.__map[index, currentLocation] = 0
                 self.__map[index, limited] = 1
                 self.__record(f"{npc} has moved from {self.__locations[currentLocation]} to {self.__locations[limited]}.")
@@ -379,9 +380,9 @@ class Simulation(object):
     # def __display_summary(self):
     #     for key, value in self.getSummary(mode='debug').items():
     #         if key == "map_of_coordinates":
-    #             print(key,": \n" ,value)
+    #             
     #         else:
-    #             print(key,": ", value)
+    #             
 
     def start(self):
         """

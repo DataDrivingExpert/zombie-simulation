@@ -19,6 +19,44 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
 
     # ---------------------------> Comands <------------------------------------
 
+    def enable_check_room(choice="") -> None:
+        """
+        """
+        if checkbox.get() == 1:
+            room_selector.configure(state="normal")
+            fsum_label.configure(text="Per Room Summary")
+
+            floor_index :int = locations_map[location_selector.get()]
+            roomIndex :int = rooms_map[room_selector.get()]
+
+            nhumans, nzombies, nsensors = (0,0,0)
+
+            for loc in _simulation.getLocations():
+                room = loc.getRoom()
+                room.checkRoom(whoIs=_simulation.whoIs(locId=loc.getId()))
+                if room.getFloorNumber() == floor_index and room.getRoomNumber() == roomIndex:
+                    if room.getSensorState() == 'alert':
+                        nsensors += 1
+                    for entity in _simulation.whoIs(locId=loc.getId()):
+                        if type(entity.getInstance()) == Human:
+                            nhumans += 1
+                        else:
+                            nzombies += 1
+                        continue
+                    pass
+                continue
+
+            humansCard_value.configure(text=str(nhumans))
+            zombiesCard_value.configure(text=str(nzombies))
+            sensorsCard_value.configure(text=str(nsensors))
+            pass
+        else:
+            room_selector.configure(state="disabled")
+            fsum_label.configure(text="Floor Summary")
+            handle_location()
+
+        pass
+
     def ping_sensors() -> None:
         """
         `ping_btn`'s command.
@@ -64,14 +102,14 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
         else:
             pass
 
-    def handle_location(choice) -> None:
+    def handle_location(choice="") -> None:
         """
         This procedure handles the `command` call function at the `ctk.CtkOptionMenu`
         for the `Location` selection.
         Args:
             choice(str): The choice that user has taken. It's equal to the floor index.
         """
-        choiceInt = locations_map[choice]
+        choiceInt = locations_map[location_selector.get()]
         
         nhumans, nzombies, nsensors = (0,0,0)
 
@@ -89,7 +127,6 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
         humansCard_value.configure(text=str(nhumans))
         zombiesCard_value.configure(text=str(nzombies))
         sensorsCard_value.configure(text=str(nsensors))
-        
         pass
 
     def update_scenery() -> None:
@@ -108,10 +145,14 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
         This procedure refresh data about floor summary, scenery and Simulation logs. 
         it lets us to display updated info over Dashboard.
         """
-        handle_location(location_selector.get()) # Updates the Floor Summary
         get_simulation_logs()   # Updates the Simulation logs
         update_scenery()   # Updates the scenery details
-        reset_sensors() # Updates the sensor logs and last triggered.
+
+        if checkbox.get() == 1:
+            enable_check_room()
+        else:
+            handle_location(location_selector.get()) # Updates the Floor Summary
+
         pass
 
     def play_simulation() -> None:
@@ -128,6 +169,7 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
 
     def restart_simulation():
         _simulation.restart()
+        reset_sensors() # Updates the sensor logs and last triggered.
         refresh_dashboard()
     # --------------------------------------------------------------------------
 
@@ -139,10 +181,17 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
     )
     _simulation.build_scenery()
     time.sleep(0.700)
+    
 
     locations_map :dict[str, int]= dict()
     for floor in range(_floors):
-        locations_map[f"floor {floor+1}"] = floor
+        locations_map[f"floor {floor+1}"] = floor+1
+
+    rooms_map :dict[str, int]= dict()
+    for room in range(_rooms):
+        
+        rooms_map[f"room {room+1}"] = room+1
+    
     
     # --------------------------------------------------------------------------
     # root define the base.
@@ -191,6 +240,19 @@ def dashboard(previous:ctk.windows.ctk_tk.CTk,simulation_details:tuple[int,int,i
         )
     location_selector.grid(row=0,column=1, pady=10,padx=10)
 
+    checkbox = ctk.CTkCheckBox(master=location, text="check room", command=enable_check_room)
+    checkbox.grid(row=0, column=2, pady=10, padx=10)
+
+    room_var = tk.StringVar(value="room 1")
+    room_selector = ctk.CTkOptionMenu(
+        master=location,
+        font=styles.NORMAL_FONT,
+        values=[key for key in rooms_map.keys()],
+        variable=room_var,
+        command=enable_check_room,
+        state="disabled"
+        )
+    room_selector.grid(row=0, column=3, pady=10, padx=10)
 
     # --------------------> fsum: Floor summary <---------------------
     # This is inside leftCol

@@ -16,7 +16,7 @@ class Floor(object):
     def __generateRooms(self):
         r_objects: list[Room] = []
         for i in range(self.__n_rooms):
-            r_objects.append(Room(room_number=i, floor=self.getFloorNumber()))
+            r_objects.append(Room(room_number=i+1, floor=self.getFloorNumber()))
         
         self.__rooms = tuple(r_objects)
         pass
