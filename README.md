@@ -6,7 +6,7 @@ Candidato autor: [Osvaldo Herrera](https://datadrivingexpert.github.io/my-portfo
 ### Descripción breve
 
 En esta simulación, los zombies atacan el edificio. Los humanos lo defienden.  
-Los zombies se moverán por el edificio hasta encontrar humanos, cuando los encuentren, no seguirán avanzando hasta acabarlos. El movimiento de los zombies siempre es de _traslado_.  
+Los zombies se moverán por el edificio hasta encontrar humanos. Cuando los encuentren, no seguirán avanzando hasta acabarlos. El movimiento de los zombies siempre es de _traslado_.  
 Por otro lado, los humanos juegan a la defensiva. Pelearán y no se moverán a menos que se vean superados en número de 2 a 1.  
 Los zombies siempre aparecerán en el primer piso, primera habitación. Por otro lado, los humanos pueden aparecer en ubicaciones aleatorias del edificio.
 
@@ -17,7 +17,7 @@ La versión específica de `Python` utilizada es la `3.12.6`.
 
 1. ejecute:
    > pip install -r requirements.txt
-2. arranque el programa desde el punto de entrada `zombie-simulation/main.py`:
+2. arranque el programa desde el punto de entrada [zombie-simulation/main.py](main.py):
 
 - Linux
   > python3 main.py
@@ -29,6 +29,9 @@ La versión específica de `Python` utilizada es la `3.12.6`.
 #### Configuración de la simulación
 
 ![Pantalla de configuración de la simulación. Cuenta con tres deslizadores para seleccionar: la cantidad pisos, habitaciones por piso y número de humanos a generar. Todos los deslizadores están limitados a una cantidad de diez.](images/simulation-config.png)
+
+> [!NOTE]
+> La cantidad señalada en `Rooms`, se aplicará a cada piso. Es decir, que 4 `Floor` y 3 `Room` generará 12 habitaciones en total. 
 
 En primer lugar, se debe configurar los aspectos generales de la simulación. Esto es sencillo e intuitivo. Tras seleccionar la cantidad, haga clic sobre el botón `start`.
 
@@ -99,6 +102,10 @@ Cada objeto `Location` cuenta con un ID que corresponde con el índice de su res
 
 #### Entidades
 
-- `Human`: representa a un humano dentro de la simulación del ataque zombie. Los humanos juegan el rol de defender el edificio: no se mueven a menos que los zombies 2 o más zombies los alcancen. De lo contrario, pelearán para defender el edificio.
+- `Human`: representa a un humano dentro de la simulación del ataque zombie. Los humanos juegan el rol de defender el edificio. No se mueven a menos que los alcance un grupo de zombies que doble el número de humanos en la misma ubicación. De lo contrario, pelearán para defender el edificio.
+> [!NOTE]
+> Los humanos provocan 30 de daño por turno.
 
-- `Zombie`: los invasores de la simulación. Los objetos `Zombie` heredan de `Human` con una crucial diferencia: su nivel infección. Los humanos tienen un nivel de infección inferior a float 100.0.
+- `Zombie`: los invasores de la simulación. Los objetos `Zombie` heredan de `Human` con una crucial diferencia: su nivel de infección. Los humanos tienen un nivel de infección inferior a float 100.0. Al atacar, tienen menos fuerza que los humanos, pero tienen la capacidad de infectarlos.
+> [!NOTE]
+> Los zombies provocan 10 de daño por turno. Pero, a su vez provocan 2 veces su daño, en puntos de infección (20 por turno).
